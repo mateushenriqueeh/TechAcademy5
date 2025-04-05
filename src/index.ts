@@ -5,19 +5,21 @@ import userRoutes from "./routes/userRoutes";
 const app = express();
 const port = 3000;
 
-app.get("/", (req, res) => {
-  res.send("Hello World");
+app.get("/", (res, req) => {
+  req.send("Hello World");
 });
 
+app.use(express.json());
 app.use(userRoutes);
 
+// sync database
 sequelize
   .sync({ alter: true })
   .then(() => {
-    console.log("Banco de dados conectado");
+    console.log("Datababse sincronizado com sucesso");
   })
   .catch((error) => {
-    console.log("Erro ao conectar o Banco");
+    console.log("Erro ao conectar o banco de dados");
   });
 
 app.listen(port, () => {
