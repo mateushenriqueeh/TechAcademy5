@@ -7,6 +7,7 @@ export const getAll = async (req: Request, res: Response) => {
   res.send(users);
 };
 
+// método que busca por id
 export const getUserById = async (
   req: Request<{ id: number }>,
   res: Response
@@ -16,19 +17,66 @@ export const getUserById = async (
   return res.json(user);
 };
 
-export const createUser = async (req: Request, res: Response) => {
-  const { name } = req.body;
+// método que criar usuario
 
+// método que cria um novo usuário
+export const createUser = async (req: Request, res: Response) => {
   try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: "Values required" });
+    }
+
+    const user = await UserModel.create({ name, email, password });
+    res.status(201).json(user);
+  } catch (error) {
+    res.status(500).json("Erro interno no servidor " + error);
+  }
+};
+
+// método que atualiza um usuario
+
+export const updateUser = async (
+  req: Request<{ id: number }>,
+  res: Response
+) => {
+  try {
+    const { name } = req.body;
     if (!name || name === "") {
       return res
         .status(400)
         .json({ error: "Propriedade nome não pode ser nula" });
     }
+    const user = await UserModel.findByPk(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
 
-    const user = await UserModel.create({ name });
-    res.status(201).json(user);
+    user.name = name;
+
+    await user.save();
+    res.status(201).json(updateUser);
   } catch (error) {
     res.status(500).json("Erro interno do servidor" + error);
+  }
+};
+
+// método que deleta
+export const deleteUserById = async (
+  req: Request<{ id: number }>,
+  res: Response
+) => {
+  try {
+    const user = await UserModel.findByPk(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+
+    await user.destroy();
+
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json("Erro interno no servidor" + error);
   }
 };
